@@ -134,7 +134,9 @@ def make_callable(f_name,m_name=None):
 	if(len(names)==1):
 		return getattr( sys.modules[ '__main__' ], f_name )
 	else:
-		return getattr( sys.modules[ names[0] ], names[1] )
+		m_name = '.'.join(names[:-1])
+		f_name = names[-1]
+		return getattr( sys.modules[ m_name ], f_name )
 
 # @functools.lru_cache(maxsize=8000)
 # def __0_str_to_callable__(f_name,m_name=None):
