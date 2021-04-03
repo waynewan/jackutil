@@ -106,3 +106,24 @@ def extractValue(container,*,keychain=None,path=None):
 		container = container[int(firstkey)]
 	return extractValue(container,keychain=keychain)
 
+# --
+# -- following python code create a demo1_sysfilter.demo1_sysfilter object
+# -- cfg = {
+# -- 	"sysfilter" : {
+# -- 		"cls" : demo1_sysfilter.demo1_sysfilter,
+# -- 		"opt" : { 'symbol' : 'QQQ', 'period' : 200, "algo" : "ALGO_1" },
+# -- 	},
+# -- }
+# -- sysfilter = cfg_to_obj(cfg,"sysfilter")
+# --
+def cfg_to_obj(rtcfg,component_name,built_obj_map,**kv):
+	build_instruction = rtcfg[component_name]
+	if(component_name in built_obj_map):
+		return built_obj_map[component_name]
+	else:
+		obj_cls = build_instruction["cls"]
+		obj_opt = build_instruction["opt"]
+		obj = obj_cls(opt=obj_opt,**kv)
+		built_obj_map[component_name] = obj
+		return obj
+

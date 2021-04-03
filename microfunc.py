@@ -43,11 +43,6 @@ def apply_func(val,func,cmp=is_none):
 def date_only(dt):
 	return apply_func(dt,datetime.date)
 
-# def __date__(dt):
-# 	if(dt is None):
-# 		return None
-# 	return dt.date()
-
 # --
 # -- str: python str
 # -- dt: python datetime
@@ -111,21 +106,6 @@ def dt_conv(from_val=None,to_type='str'):
 	converter = make_callable( m_name=__name__, f_name=f"{from_type}_to_{to_type}" )
 	return converter(from_val)
 
-# def __0_date_str__(dt,t=-1):
-# 	v = None,None
-# 	if(isinstance(dt,(datetime,date))):
-# 		n = dt.strftime('%Y-%m-%d')
-# 		v = dt, n, n
-# 	elif(isinstance(dt,str)):
-# 		n = datetime.strptime(dt, '%Y-%m-%d')
-# 		v = n, dt, n
-# 	else:
-# 		return dt
-# 	if(t is None):
-# 		return v[:1]
-# 	else:
-# 		return v[t]
-
 @functools.lru_cache(maxsize=200)
 def make_callable(f_name,m_name=None):
 	if(m_name is not None):
@@ -137,20 +117,6 @@ def make_callable(f_name,m_name=None):
 		m_name = '.'.join(names[:-1])
 		f_name = names[-1]
 		return getattr( sys.modules[ m_name ], f_name )
-
-# @functools.lru_cache(maxsize=8000)
-# def __0_str_to_callable__(f_name,m_name=None):
-# 	if(m_name is not None):
-# 		return getattr( sys.modules[ m_name ], f_name )
-# 	names = f_name.split('.')
-# 	if(len(names)==1):
-# 		return getattr( sys.modules[ '__main__' ], f_name )
-# 	else:
-# 		return getattr( sys.modules[ names[0] ], names[1] )
-# 
-# def clear_cache():
-# 	__0_str_to_callable__.clear_cache()
-
 # --
 # --
 # --
