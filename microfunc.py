@@ -117,6 +117,9 @@ def make_callable(f_name,m_name=None):
 		m_name = '.'.join(names[:-1])
 		f_name = names[-1]
 		return getattr( sys.modules[ m_name ], f_name )
+
+def callable_fq_name(func):
+	return ".".join([ func.__module__,func.__name__ ])
 # --
 # --
 # --
