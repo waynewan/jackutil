@@ -1,13 +1,9 @@
+import itertools as itt
 import hashlib
 
 # --
 # --
 # --
-def featuresFromContainer(container):
-	return flattenContainer(
-		container,inclroot=False
-	).keys()
-
 def updateContainer(root,keychain,newval,auto_expand=True):
 	if(isinstance(keychain,str)):
 		keychain = keychain.split('/')
@@ -127,3 +123,40 @@ def cfg_to_obj(rtcfg,component_name,built_obj_map,**kv):
 		built_obj_map[component_name] = obj
 		return obj
 
+def featuresFromContainer(container):
+	return containerKeys(container)
+
+def containerKeys(container):
+	# --
+	# --
+	# --
+	def _expand_tuple_key(key):
+		if(isinstance(key,tuple)):
+			return key
+		return [ key ]
+	# --
+	# --
+	# --
+	return [ kk for k in container.keys() for kk in _expand_tuple_key(k) ]
+
+def containerVariations(container):
+	# --
+	# --
+	# --
+	def _expand_tuple_keyval(key,val):
+		if(isinstance(key,tuple)):
+			expanded = { k:v for k,v in zip(key,val)}
+			return expanded.items()
+		return [ (key,val) ]
+	# --
+	# !! do not use yield, because unlikely to have large # of configuration
+	# --
+	test_val_lst = list(container.values())
+	test_keys = container.keys()
+	tests = list( itt.product(*test_val_lst))
+	paired_tests = []
+	for tuple_test in tests:
+		test = { k:v for k,v in zip(test_keys,tuple_test)}
+		test = { kk:vv for k,v in test.items() for kk,vv in _expand_tuple_keyval(k,v)}
+		paired_tests.append(test)
+	return paired_tests

@@ -1,6 +1,5 @@
-import itertools as itt
 import copy 
-from .containerutil import projectContainer
+from .containerutil import projectContainer,containerKeys,containerVariations
 
 # --
 # --
@@ -17,7 +16,7 @@ class configuration:
 	def __read_variation(self): return self.__variations
 	variations = property(__read_variation,None,None)
 	# --
-	# --
+	# !! do not use yield, because unlikely to have large # of configuration
 	# --
 	def all_configurations(self):
 		all_specs = []
@@ -29,37 +28,7 @@ class configuration:
 		return all_specs 
 
 	def all_variations(self):
-		# --
-		# --
-		# --
-		def _expand_tuple_keyval(key,val):
-			if(isinstance(key,tuple)):
-				expanded = { k:v for k,v in zip(key,val)}
-				return expanded.items()
-			return [ (key,val) ]
-		# --
-		# --
-		# --
-		test_val_lst = list(self.__variations.values())
-		test_keys = self.__variations.keys()
-		tests = list( itt.product(*test_val_lst))
-		paired_tests = []
-		for tuple_test in tests:
-			test = { k:v for k,v in zip(test_keys,tuple_test)}
-			test = { kk:vv for k,v in test.items() for kk,vv in _expand_tuple_keyval(k,v)}
-			paired_tests.append(test)
-		return paired_tests
+		return containerVariations(self.__variations)
 
 	def keys(self):
-		# --
-		# --
-		# --
-		def _expand_tuple_key(key):
-			if(isinstance(key,tuple)):
-				return key
-			return [ key ]
-		# --
-		# --
-		# --
-		return [ kk for k in self.__variations.keys() for kk in _expand_tuple_key(k) ]
-
+		return containerKeys(self.__variations)
