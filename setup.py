@@ -7,5 +7,5 @@ author='#',
 author_email='#',
 license='Apache 2.0',
 packages=['jackutil'],
-package_dir={'jackutil':'.'},
+package_dir={'jackutil':'jackutil'},
 zip_safe=False)
