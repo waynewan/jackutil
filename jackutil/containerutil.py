@@ -2,7 +2,7 @@ import itertools as itt
 import hashlib
 
 # --
-# --
+# !! TODO: auto_expand=True not working, need to fix it
 # --
 def updateContainer(root,keychain,newval,auto_expand=True):
 	if(isinstance(keychain,str)):
@@ -74,12 +74,12 @@ def constructContainer(flatdict,auto_expand=True):
 	result = flatdict['/']
 	for k,v in flatdict.items():
 		if(k=='/'): continue
-		updateContainer(result,k,v,auto_expand=True)
+		updateContainer(result,k,v,auto_expand)
 	return result
 
 def projectContainer(surface,flatdict,auto_expand=True):
 	for k,v in flatdict.items():
-		updateContainer(surface,k,v,auto_expand=True)
+		updateContainer(surface,k,v,auto_expand)
 	return surface
 
 def containerChecksum(dictionary):

@@ -13,17 +13,17 @@ class configuration:
 	# --
 	def __read_basespec(self): return self.__basespec
 	basespec = property(__read_basespec,None,None)
-	def __read_variation(self): return self.__variations
-	variations = property(__read_variation,None,None)
+	def __read_variations(self): return self.__variations
+	variations = property(__read_variations,None,None)
 	# --
 	# !! do not use yield, because unlikely to have large # of configuration
 	# --
-	def all_configurations(self):
+	def all_configurations(self,*,auto_expand=False):
 		all_specs = []
 		for path_val_map in self.all_variations():
 			base_spec = self.__basespec
 			base_spec = copy.deepcopy(self.__basespec)
-			final_spec = projectContainer(base_spec,path_val_map)
+			final_spec = projectContainer(base_spec,path_val_map,auto_expand)
 			all_specs.append(final_spec)
 		return all_specs 
 
