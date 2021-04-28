@@ -1,5 +1,6 @@
 import itertools as itt
 import hashlib
+import collections.abc as abc
 
 # --
 # !! TODO: auto_expand=True not working, need to fix it
@@ -148,10 +149,16 @@ def containerVariations(container):
 			expanded = { k:v for k,v in zip(key,val)}
 			return expanded.items()
 		return [ (key,val) ]
+	def wrap_val_in_list(vv):
+		if(isinstance(vv,str)):
+			return (vv,)
+		if(isinstance(vv,abc.Iterable)):
+			return vv
+		return (vv,)
 	# --
 	# !! do not use yield, because unlikely to have large # of configuration
 	# --
-	test_val_lst = list(container.values())
+	test_val_lst = ( wrap_val_in_list(vv) for vv in container.values() )
 	test_keys = container.keys()
 	tests = list( itt.product(*test_val_lst))
 	paired_tests = []

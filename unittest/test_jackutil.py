@@ -76,7 +76,9 @@ basespec = {
 }
 delta = { 
 	"a" : range(3, 20, 3),
-	"x/c" : range(4, 20, 4) 
+	"x/c" : range(4, 20, 4),
+	"b" : -1,
+	"x/d" : "xyz",
 }
 cc = configuration(basespec=basespec,variations=delta)
 print("=" * 30)

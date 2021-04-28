@@ -23,7 +23,7 @@ def inrange(it,*,lt=None,le=None,gt=None,ge=None):
 	if(lt is not None):
 		right_cond = it < lt
 	return left_cond & right_cond
-		
+
 def is_none(val):
 	return val is None
 
