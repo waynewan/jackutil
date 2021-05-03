@@ -71,8 +71,9 @@ def dt64_to_str(val):
 	return numpy.datetime_as_string(val, unit='D')
 
 def dt64_to_dt(val):
-	ts = (val - np.datetime64('1970-01-01T00:00:00Z')) / np.timedelta64(1, 's')
-	return datetime.datetime(ts)
+	return str_to_dt( dt64_to_str(val) )
+	# ts = (val - numpy.datetime64('1970-01-01T00:00:00Z')) / numpy.timedelta64(1, 's')
+	# return datetime(int(ts)) # dropping the micro seconds
 
 def dt64_to_ts(val):
 	pass
