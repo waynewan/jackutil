@@ -1,3 +1,5 @@
+import pandas as pd
+
 class AuditedValue:
 	def __init__(self,defval=None):
 		self.__defval = defval
@@ -29,8 +31,30 @@ class AuditedValue:
 			self.__value=self.__audit[-1][0]
 	value = property(getvalue,setvalue,delvalue,"audited variable")
 
+	def to_dataframe(self,prefix=None,marker=None,ts_as_index=True,limit=-1):
+		if(prefix is None):
+			prefix = ""
+		elif(prefix[-1] !='_'):
+			prefix = prefix + '_'
+		sl = slice(None,None,None)
+		if(limit>0):
+			sl = slice(0,limit,1)
+		df = pd.DataFrame(self.getaudit()[sl], columns=[prefix+'value',prefix+'ts',prefix+'note'])
+		if(marker is not None):
+			df[prefix+'type'] = marker
+			if(ts_as_index):
+				df = df.set_index([prefix+'ts',prefix+'type'])
+			return df
+		if(ts_as_index):
+			df = df.set_index(prefix+'ts')
+		return df
+
 	def __str__(self):
-		return str(self.getvalue())
+		# return str(self.getvalue())
+		if(self.hasvalue()):
+			return str(self.audit[-1])
+		return str(self.__defval)
 
 	def __repr__(self):
-		return str(self.getvalue())
+		# return str(self.getvalue())
+		return __str__(self)
