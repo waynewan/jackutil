@@ -50,34 +50,74 @@ def date_only(dt):
 # -- ts: pandas.Timestamp
 # --
 def str_to_dt(val):
-	return datetime.strptime(val, '%Y-%m-%d')
+	try:
+		return datetime.strptime(val, '%Y-%m-%d')
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def str_to_dt64(val):
-	return numpy.datetime64(val)
+	try:
+		return numpy.datetime64(val)
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def str_to_ts(val):
-	return pandas.Timestamp(ts_input=val)
+	try:
+		return pandas.Timestamp(ts_input=val)
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 # --
 def dt_to_str(val):
-	return val.strftime('%Y-%m-%d')
+	try:
+		return val.strftime('%Y-%m-%d')
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def dt_to_dt64(val):
-	return numpy.datetime64(val)
+	try:
+		return numpy.datetime64(val)
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def dt_to_ts(val):
-	return pandas.Timestamp(ts_input=val)
+	try:
+		return pandas.Timestamp(ts_input=val)
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 # --
 def dt64_to_str(val):
-	return numpy.datetime_as_string(val, unit='D')
+	try:
+		return numpy.datetime_as_string(val, unit='D')
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def dt64_to_dt(val):
-	return str_to_dt( dt64_to_str(val) )
-	# ts = (val - numpy.datetime64('1970-01-01T00:00:00Z')) / numpy.timedelta64(1, 's')
-	# return datetime(int(ts)) # dropping the micro seconds
+	try:
+		# ts = (val - numpy.datetime64('1970-01-01T00:00:00Z')) / numpy.timedelta64(1, 's')
+		# return datetime(int(ts)) # dropping the micro seconds
+		return str_to_dt( dt64_to_str(val) )
+	except TypeError as err:
+		print(type(val),val)
+		print(err)
+		return str(val)
 
 def dt64_to_ts(val):
 	pass
-# --
+
 def ts_to_str(val):
 	pass
 
