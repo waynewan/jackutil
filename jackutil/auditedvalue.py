@@ -4,6 +4,8 @@ class AuditedValue:
 	def __init__(self,defval=None):
 		self.__defval = defval
 		self.__value = None
+		self.__date = None
+		self.__msg = None
 		self.__audit = []
 
 	def hasvalue(self):
@@ -13,15 +15,23 @@ class AuditedValue:
 		return self.__audit
 	audit = property(getaudit,None,None,"audit trail")
 
-	def getvalue(self):
-		if(self.hasvalue()):
-			return self.__value
+	def getvalue(self,meta=False):
+		if(meta):
+			if(self.hasvalue()):
+				return (self.__value,self.__date,self.__msg)
+			else:
+				return (self.__defval,None,None)
 		else:
-			return self.__defval
+			if(self.hasvalue()):
+				return self.__value
+			else:
+				return self.__defval
 	def setvalue(self,value,date=None,msg=None):
 		if(hasattr(value,'__iter__')):
 			value,date,msg = value
 		self.__value = value
+		self.__date = date
+		self.__msg = msg
 		self.__audit.append( (value,date,msg) )
 	def delvalue(self):
 		self.__audit.pop()
@@ -50,11 +60,9 @@ class AuditedValue:
 		return df
 
 	def __str__(self):
-		# return str(self.getvalue())
 		if(self.hasvalue()):
 			return str(self.audit[-1])
 		return str(self.__defval)
 
 	def __repr__(self):
-		# return str(self.getvalue())
-		return __str__(self)
+		return self.__str__()

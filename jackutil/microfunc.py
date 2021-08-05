@@ -73,9 +73,9 @@ def str_to_ts(val):
 		print(err)
 		return str(val)
 # --
-def dt_to_str(val):
+def dt_to_str(val,delimiter='-'):
 	try:
-		return val.strftime('%Y-%m-%d')
+		return val.strftime('%Y{0}%m{0}%d'.format(delimiter))
 	except TypeError as err:
 		print(type(val),val)
 		print(err)
@@ -144,7 +144,7 @@ def dt_conv(from_val=None,to_type='str'):
 	if(from_type==to_type):
 		return from_val
 	# --
-	converter = make_callable( m_name=__name__, f_name=f"{from_type}_to_{to_type}" )
+	converter = make_callable( m_name=__name__, f_name="{0}_to_{1}".format(from_type,to_type) )
 	return converter(from_val)
 
 @functools.lru_cache(maxsize=200)
