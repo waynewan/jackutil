@@ -4,6 +4,7 @@ import numpy
 import sys
 import hashlib
 import pandas
+import importlib
 
 # --
 # --
@@ -150,6 +151,8 @@ def dt_conv(from_val=None,to_type='str'):
 @functools.lru_cache(maxsize=200)
 def make_callable(f_name,m_name=None):
 	if(m_name is not None):
+		if(m_name not in sys.modules):
+			importlib.import_module(m_name)
 		return getattr( sys.modules[ m_name ], f_name )
 	names = f_name.split('.')
 	if(len(names)==1):
@@ -157,6 +160,8 @@ def make_callable(f_name,m_name=None):
 	else:
 		m_name = '.'.join(names[:-1])
 		f_name = names[-1]
+		if(m_name not in sys.modules):
+			importlib.import_module(m_name)
 		return getattr( sys.modules[ m_name ], f_name )
 
 def callable_fq_name(func):
