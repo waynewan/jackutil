@@ -148,6 +148,9 @@ def dt_conv(from_val=None,to_type='str'):
 	converter = make_callable( m_name=__name__, f_name="{0}_to_{1}".format(from_type,to_type) )
 	return converter(from_val)
 
+def clear_cache():
+	make_callable.cache_clear()
+
 @functools.lru_cache(maxsize=200)
 def make_callable(f_name,m_name=None):
 	if(m_name is not None):
