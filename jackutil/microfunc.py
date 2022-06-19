@@ -6,6 +6,20 @@ import hashlib
 import pandas
 import importlib
 
+def roundup(nn,dp=2):
+	rounded = round(nn,dp)
+	if(rounded>=nn):
+		return rounded
+	else:
+		return rounded+pow(10,-dp)
+	
+def rounddown(nn,dp=2):
+	rounded = round(nn,dp)
+	if(rounded<=nn):
+		return rounded
+	else:
+		return rounded-pow(10,-dp)
+	
 # --
 # --
 # --
