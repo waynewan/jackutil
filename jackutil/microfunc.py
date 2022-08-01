@@ -210,3 +210,14 @@ def rename_columns(df,cols_name):
 		df.rename( columns=lambda ii:cols_name[ii],inplace=True )
 	return df
 
+# --
+# -- add list2 to list1, keep order intact, eliminate dup
+# !! list1 is modified
+# --
+def concat_lists(lst1,lst2):
+	for ele in lst2:
+		if(ele in lst1):
+			continue
+		lst1.append(ele)
+	return lst1
+
