@@ -42,6 +42,17 @@ def inrange(it,*,lt=None,le=None,gt=None,ge=None):
 		right_cond = it < lt
 	return left_cond & right_cond
 
+def inrange_q(it,*,lt=None,le=None,gt=None,ge=None):
+	if(lt is not None):
+		lt = it.quantile(lt)
+	if(le is not None):
+		le = it.quantile(le)
+	if(gt is not None):
+		gt = it.quantile(gt)
+	if(ge is not None):
+		ge = it.quantile(ge)
+	return inrange(it,lt=lt,le=le,gt=gt,ge=ge)
+
 def is_none(val):
 	return val is None
 
