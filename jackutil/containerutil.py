@@ -124,6 +124,12 @@ def cfg_to_obj(rtcfg,component_name,built_obj_map,**kv):
 		built_obj_map[component_name] = obj
 		return obj
 
+def cfg_to_optional_obj(rtcfg,component_name,built_obj_map,**kv):
+	if(component_name in rtcfg):
+		return cfg_to_obj(rtcfg,component_name,built_obj_map,**kv)
+	else:
+		return None
+
 def featuresFromContainer(container):
 	return containerKeys(container)
 
