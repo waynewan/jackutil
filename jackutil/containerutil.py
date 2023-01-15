@@ -119,7 +119,8 @@ def cfg_to_obj(rtcfg,component_name,built_obj_map,**kv):
 		return built_obj_map[component_name]
 	else:
 		obj_cls = build_instruction["cls"]
-		obj_opt = build_instruction["opt"]
+		obj_opt = build_instruction["opt"].copy()
+		obj_opt['__linker__'] = lambda obj_name : built_obj_map[obj_name]
 		obj = obj_cls(opt=obj_opt,**kv)
 		built_obj_map[component_name] = obj
 		return obj
