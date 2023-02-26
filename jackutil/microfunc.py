@@ -23,6 +23,9 @@ def rounddown(nn,dp=2):
 def extractvalues(src_map, key_vec):
 	return { key:src_map[key] for key in key_vec if(key in src_map) }
 
+def extractvalues_noskip(src_map, key_vec, defval=None):
+	return { key:src_map.get(key,defval) for key in key_vec }
+
 # --
 # --
 # --
