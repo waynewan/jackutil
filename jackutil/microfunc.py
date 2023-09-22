@@ -75,6 +75,12 @@ def apply_func(val,func,cmp=is_none):
 def date_only(dt):
 	return apply_func(dt,datetime.date)
 
+def if_else(cond,true_val,false_val):
+    if(cond):
+        return true_val
+    else:
+        return false_val
+
 # --
 # -- str: python str
 # -- dt: python datetime
