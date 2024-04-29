@@ -1,6 +1,6 @@
 from setuptools import setup
 setup(name='jackutil',
-version='0.2.0.0',
+version='0.2.0.2',
 description='jack of all trades python package',
 url='#',
 author='#',
