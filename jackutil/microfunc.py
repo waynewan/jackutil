@@ -1,4 +1,5 @@
 from datetime import datetime, date
+import time
 import functools
 import numpy
 import sys
@@ -241,3 +242,24 @@ def concat_lists(lst1,lst2):
 		lst1.append(ele)
 	return lst1
 
+# --
+# --
+# --
+def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True):
+	exceptions = []
+	for _ in range(0,retry):
+		try:
+			outcome = fn()
+			if(rtnEx):
+				return ( outcome, exceptions )
+			else:
+				return outcome
+		except exceptTypes as ex:
+			if(not silent):
+				print(ex)
+			exceptions.append( ex )
+			time.sleep(pause)
+	if(rtnEx):
+		return ( None, exceptions )
+	else:
+		raise exceptions[-1]
