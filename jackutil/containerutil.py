@@ -103,6 +103,19 @@ def extractValue(container,*,keychain=None,path=None):
 		container = container[int(firstkey)]
 	return extractValue(container,keychain=keychain)
 
+def assignValue(container,*,keychain=None,path=None,newval=None):
+	if(path is not None): keychain = path.split('/')
+	if(len(keychain)==1):
+		container[keychain[0]] = newval
+		return
+	firstkey = keychain[0]
+	keychain = keychain[1:]
+	if(isinstance(container,dict)):
+		container = container[firstkey]
+	else:
+		container = container[int(firstkey)]
+	return assignValue(container,keychain=keychain,newval=newval)
+
 # --
 # -- following python code create a demo1_sysfilter.demo1_sysfilter object
 # -- cfg = {
