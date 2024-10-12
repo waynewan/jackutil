@@ -6,6 +6,7 @@ import sys
 import hashlib
 import pandas
 import importlib
+import inspect
 
 def roundup(nn,dp=2):
 	rounded = round(nn,dp)
@@ -256,6 +257,7 @@ def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True):
 				return outcome
 		except exceptTypes as ex:
 			if(not silent):
+				print(inspect.stack()[1].code_context)
 				print(ex)
 			exceptions.append( ex )
 			time.sleep(pause)
