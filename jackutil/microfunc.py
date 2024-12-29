@@ -187,6 +187,20 @@ def dt_conv(from_val=None,to_type='str'):
 	converter = make_callable( m_name=__name__, f_name="{0}_to_{1}".format(from_type,to_type) )
 	return converter(from_val)
 
+# --
+# --
+# --
+def reload_module(module_name):
+	try:
+		module = importlib.import_module(module_name)
+		importlib.reload(module)
+		print(f"Module {module_name} reloaded.")
+	except ModuleNotFoundError:
+		print(f"Module {module_name} not found.")
+
+# --
+# --
+# --
 def clear_cache():
 	make_callable.cache_clear()
 
@@ -265,3 +279,41 @@ def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True):
 		return ( None, exceptions )
 	else:
 		raise exceptions[-1]
+
+# --
+# -- Reads a file and returns its numeric content as an integer, 
+# -- or None if the file is empty or non-numeric.
+# --
+def read_numeric_from_file(fname):
+	try:
+		with open(fname, 'r') as file:
+			content = file.read().strip()
+			if content.isdigit():
+				print(f'The file {fname} found, Using value {content}.')
+				return int(content)
+			else:
+				print(f'The file {fname} found, but cannot interpret content. Using None.')
+				return None
+	except FileNotFoundError:
+		print(f"The file {fname} does not exist.")
+		return None
+
+# -- 
+# -- Creates an empty file with the given name 'fname', 
+# -- and if the file exists, empties its content.
+# -- 
+def create_or_empty_file(fname):
+    with open(fname, 'w') as file:
+        pass  # Opening the file in 'w' mode will create it if it doesn't exist, or empty it if it does.
+
+# --
+# -- Writes the current Unix timestamp to a file.
+# --
+def write_current_time_to_file(fname):
+    # Get the current Unix timestamp
+    current_time = int(time.time())
+    
+    # Write the timestamp to the file
+    with open(fname, 'w') as file:
+        file.write(str(current_time))
+
