@@ -137,9 +137,12 @@ def dt_to_ts(val):
 		print(err)
 		return str(val)
 # --
-def dt64_to_str(val):
+def dt64_to_str(val,delimiter='-'):
 	try:
-		return numpy.datetime_as_string(val, unit='D')
+		# --
+		# -- datetime_as_string use '-' as delimiter
+		# --
+		return numpy.datetime_as_string(val, unit='D').replace('-',delimiter)
 	except TypeError as err:
 		print(type(val),val)
 		print(err)
