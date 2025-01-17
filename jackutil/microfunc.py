@@ -263,7 +263,7 @@ def concat_lists(lst1,lst2):
 # --
 # --
 # --
-def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True):
+def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True,cooldown=None):
 	exceptions = []
 	for _ in range(0,retry):
 		try:
@@ -277,11 +277,23 @@ def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True):
 				print(inspect.stack()[1].code_context)
 				print(ex)
 			exceptions.append( ex )
-			time.sleep(pause)
+			if(cooldown is None):
+				time.sleep(pause)
+			else:
+				countdown(cooldown,desc="Cooldown")
 	if(rtnEx):
 		return ( None, exceptions )
 	else:
 		raise exceptions[-1]
+
+def countdown(seconds,desc="Countdown"):
+	# --
+	from tqdm.notebook import tqdm
+	# --
+	progress_bar = tqdm(range(seconds, 0, -1), desc=desc, unit="s", leave=False)
+	for i in progress_bar:
+		time.sleep(1)
+	progress_bar.close()
 
 # --
 # -- Reads a file and returns its numeric content as an integer, 
