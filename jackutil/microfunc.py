@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import time
 import functools
 import numpy
@@ -82,6 +82,19 @@ def if_else(cond,true_val,false_val):
 		return true_val
 	else:
 		return false_val
+
+# --
+# --
+# --
+def today():
+	return date.today()
+
+def days_between(dt_s, dt_b):
+	difference = dt_b - dt_s
+	return difference.days
+
+def days_away(dt, days):
+	return dt + timedelta(days=days)
 
 # --
 # -- str: python str
@@ -332,3 +345,16 @@ def write_current_time_to_file(fname):
     with open(fname, 'w') as file:
         file.write(str(current_time))
 
+# --
+# -- example: types_validate(base,msg="base",types=[ type([]) ],allow_none=False)
+# -- must be a list(), and cannot be None; otherwise throw ValueError
+# --
+def types_validate(obj, types=[], msg="obj", raise_on_err=True, allow_none=True):
+	if(allow_none and obj is None):
+		return True
+	if(type(obj) in types):
+		return True
+	if(raise_on_err):
+		raise ValueError(f"ERR:{msg}:Only applicable to {types}, found {type(obj)}")
+	return False
+	
