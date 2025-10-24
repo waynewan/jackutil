@@ -30,7 +30,8 @@ def create_new_browser(rootdir=None,persist_name=None,incognito=True,driver_bin_
 	if(un.system=="Linux"):
 		return __create_new_browser_linux(**params)
 	elif(un.system=="Windows"):
-		return __create_new_browser_win11(**params)
+		return __create_new_chrome_win11(**params)
+		# return __create_new_edge_win11(**params)
 	raise ValueError(f"Do not know what to do with system type: {un.system}")
 
 def __create_new_browser_linux(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
@@ -73,7 +74,7 @@ def __create_new_browser_linux(rootdir=None,persist_name=None,incognito=True,dri
 		persist_connection_info(driver=driver,persist_name=persist_name)
 	return driver
 
-def __create_new_browser_win11(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
+def __create_new_chrome_win11(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
 	if(rootdir is None):
 		rootdir = tempfile.TemporaryDirectory()
 	options = webdriver.ChromeOptions()
@@ -103,6 +104,15 @@ def __create_new_browser_win11(rootdir=None,persist_name=None,incognito=True,dri
 	if(incognito):
 		options.add_argument("--incognito")
 	driver = webdriver.Chrome(options=options)
+	return driver
+
+def __create_new_edge_win11(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
+	from selenium.webdriver.edge.options import Options
+	from selenium.webdriver.edge.service import Service
+	# --
+	options = Options()
+	options.add_argument("--disable-blink-features=AutomationControlled")
+	driver = webdriver.Edge(service=Service(), options=options)
 	return driver
 
 def persist_connection_info(*,driver=None,sessionURL=None,sessionID=None,persist_name):
