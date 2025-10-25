@@ -102,9 +102,9 @@ def days_away(dt, days):
 # -- dt64: numpy datetime64
 # -- ts: pandas.Timestamp
 # --
-def str_to_dt(val):
+def str_to_dt(val,fmt='%Y-%m-%d'):
 	try:
-		return datetime.strptime(val, '%Y-%m-%d')
+		return datetime.strptime(val, fmt)
 	except TypeError as err:
 		print(type(val),val)
 		print(err)
