@@ -331,19 +331,19 @@ def read_numeric_from_file(fname):
 # -- and if the file exists, empties its content.
 # -- 
 def create_or_empty_file(fname):
-    with open(fname, 'w') as file:
-        pass  # Opening the file in 'w' mode will create it if it doesn't exist, or empty it if it does.
+	with open(fname, 'w') as file:
+		pass  # Opening the file in 'w' mode will create it if it doesn't exist, or empty it if it does.
 
 # --
 # -- Writes the current Unix timestamp to a file.
 # --
 def write_current_time_to_file(fname):
-    # Get the current Unix timestamp
-    current_time = int(time.time())
-    
-    # Write the timestamp to the file
-    with open(fname, 'w') as file:
-        file.write(str(current_time))
+	# Get the current Unix timestamp
+	current_time = int(time.time())
+	
+	# Write the timestamp to the file
+	with open(fname, 'w') as file:
+		file.write(str(current_time))
 
 # --
 # -- example: types_validate(base,msg="base",types=[ type([]) ],allow_none=False)
@@ -358,3 +358,52 @@ def types_validate(obj, types=[], msg="obj", raise_on_err=True, allow_none=True)
 		raise ValueError(f"ERR:{msg}:Only applicable to {types}, found {type(obj)}")
 	return False
 	
+def read_dirty_csv(filepath, footer_lines=5):
+	print(f"Reading data and skipping {footer_lines} footer lines...")
+	try:
+		df = pandas.read_csv(
+			filepath,
+			engine='python',
+			skip_blank_lines=True,
+			skipfooter=footer_lines
+		)
+		df.columns = df.columns.str.strip()
+		df['Run Date'] = pandas.to_datetime(df['Run Date'], errors='coerce')
+		df['Settlement Date'] = pandas.to_datetime(df['Settlement Date'], errors='coerce')
+		return df
+	except FileNotFoundError:
+		print(f"Error: File not found at {filepath}")
+		return pandas.DataFrame()
+	except Exception as e:
+		print(f"An error occurred during file reading: {e}")
+		return pandas.DataFrame()
+
+import pandas
+
+def read_dirty_csv(filepath, header_row=1, date_col=[], num_col=[], key_col=[]):
+	try:
+		df = pandas.read_csv(
+			filepath,
+			engine='python',
+			skip_blank_lines=True,
+			header=header_row,
+		)
+		df.columns = df.columns.str.strip()
+		for nnull in key_col:
+			df = df[ ~ df[nnull].isna() ]
+		for dcol in date_col:
+			df[dcol] = pandas.to_datetime(df[dcol], errors='coerce')
+		for ncol in num_col:
+			try:
+				df[ncol] = df[ncol].str.replace(r'[$%,]','',regex=True).astype(float)
+			except Exception as e:
+				print(ncol,e)
+		return df
+	except FileNotFoundError:
+		print(f"Error: File not found at {filepath}")
+		return pandas.DataFrame()
+	except Exception as e:
+		print(e)
+		print(f"An error occurred during file reading: {e}")
+		return pandas.DataFrame()
+
