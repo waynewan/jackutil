@@ -69,7 +69,7 @@ def __create_new_browser_linux(rootdir=None,persist_name=None,incognito=True,dri
 	# --
 	if(incognito):
 		options.add_argument("--incognito")
-	driver = webdriver.Chrome(options=options,service=webdriver.ChromeService(executable_path=driver_bin_loc))
+	driver = webdriver.Chrome(options=options,service=webdriver.chrome.service.Service(executable_path=driver_bin_loc))
 #	if(persist_name is not None):
 #		persist_connection_info(driver=driver,persist_name=persist_name)
 	return driver
