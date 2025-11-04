@@ -67,7 +67,7 @@ def is_not_none(val):
 def default_val(val,defval,cmp=is_not_none):
 	if(cmp(val)):
 		return val
-	return repl 
+	return defval 
 
 def apply_func(val,func,cmp=is_none):
 	if(cmp(val)):
