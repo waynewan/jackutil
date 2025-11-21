@@ -1,11 +1,13 @@
-from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
+import subprocess
 import platform
 import argparse
 import datetime
@@ -21,133 +23,227 @@ import locale
 from pprint import pprint
 locale.setlocale(locale.LC_ALL, 'en_US.UTF8')
 
-CHROME_BINARY_LOCATION='/usr/bin/google-chrome'
-CHROME_WEBDRIVER_BINARY_LOCATION='/usr/bin/chromedriver'
-
-def create_new_browser(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
-	params = locals().copy()
+# ----------------------------------------------------------------------
+# start browser in debug mode, but detached
+# ----------------------------------------------------------------------
+DEF_EDGE_BROWSER_PATH=r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+DEF_EDGE_WEBDRV_PATH=r"C:\Program Files (x86)\Microsoft\Edge\Application\msedgedriver.exe"
+DEF_CHROME_BROWSER_PATH = r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+DEF_CHROME_WEBDRV_PATH = r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe"
+DEF_DEBUG_PORT = 9222
+DEF_CHROME_USER_DATA_DIR=r"C:\temp\w11\chrome"
+DEF_EDGE_USER_DATA_DIR=r"C:\temp\w11\edge"
+# ----------------------------------------------------------------------
+# Core Function
+# ----------------------------------------------------------------------
+def detach_process_flags():
 	un = platform.uname()
 	if(un.system=="Linux"):
-		return __create_new_browser_linux(**params)
+		return {
+			"stdout" : subprocess.DEVNULL,  # Redirect stdout to /dev/null
+			"stderr" : subprocess.DEVNULL,  # Redirect stderr to /dev/null
+			"stdin" : subprocess.DEVNULL,   # Redirect stdin from /dev/null
+			"close_fds" : True,			 # Close all file descriptors
+			"start_new_session" : True	  # Detach from the parent process group
+		}
 	elif(un.system=="Windows"):
-		return __create_new_chrome_win11(**params)
-		# return __create_new_edge_win11(**params)
-	raise ValueError(f"Do not know what to do with system type: {un.system}")
+		return {
+			"stdout" : subprocess.DEVNULL,
+			"stderr" : subprocess.DEVNULL,
+			"close_fds" : True, 
+			"creationflags" : subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+		}
 
-def __create_new_browser_linux(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
-	if(rootdir is None):
-		rootdir = tempfile.TemporaryDirectory()
-	options = webdriver.ChromeOptions()
-	options.binary_location = browser_bin_loc
-	options.add_argument("user-data-dir=%s" % rootdir)
-	options.add_experimental_option("prefs", {
-		"download.default_directory":"%s/download/" % rootdir,
-		"profile.default_content_setting_values.notifications" : 2
-	})
-	options.add_argument("--start-maximized")
-	# -- ---------------------------------------------------------------------
-	# !! try to avoid being detected as automated session
-	# -- ---------------------------------------------------------------------
-	# -- ---------------------------------------------------------------------
-	# !! based on idea from (doesn't work)
-	# !! https://stackoverflow.com/questions/33225947/can-a-website-detect-when-you-are-using-selenium-with-chromedriver
-	# !!
-	# options.add_argument("user-agent=Chrome")
-	# -- ---------------------------------------------------------------------
-	# -- ---------------------------------------------------------------------
-	# !! based on idea from (working)
-	# !! https://piprogramming.org/articles/How-to-make-Selenium-undetectable-and-stealth--7-Ways-to-hide-your-Bot-Automation-from-Detection-0000000017.html
-	# !! TDA: working as of 2022-03-17
-	# !! fidelity: working as of 2022-03-17
-	options.add_experimental_option("excludeSwitches", ["enable-automation"])
-	options.add_experimental_option('useAutomationExtension', False)
-	options.add_argument('--disable-blink-features=AutomationControlled')
-	pprint(options)
-	# -- ---------------------------------------------------------------------
+def start_edge_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_EDGE_USER_DATA_DIR, edge_path=DEF_EDGE_BROWSER_PATH):
 	# --
+	# -- Ensure the user data directory exists
 	# --
+	os.makedirs(user_data_dir, exist_ok=True)
 	# --
-	if(incognito):
-		options.add_argument("--incognito")
-	driver = webdriver.Chrome(options=options,service=webdriver.chrome.service.Service(executable_path=driver_bin_loc))
-#	if(persist_name is not None):
-#		persist_connection_info(driver=driver,persist_name=persist_name)
-	return driver
+	# -- Construct the full list of command arguments
+	# --
+	command = [
+		edge_path,
+		f"--remote-debugging-port={port}",
+		f"--user-data-dir={user_data_dir}",
+		# Optional: Start with a clean slate for the UI 
+		# "--disable-extensions",
+		# "--disable-default-apps"
+	]
+	try:
+		display(f"Starting chrome browser ... ")
+		display(command)
+		# --
+		# -- Use subprocess.Popen to start the process
+		# -- subprocess.DETACHED_PROCESS is a Windows-specific flag that ensures 
+		# -- the process is fully independent.
+		# --
+		proc = subprocess.Popen(
+			command,
+			# Critical for detachment: Redirect stdout/stderr to a null device 
+			# to prevent the Python parent process from blocking on I/O.
+			stdout=subprocess.DEVNULL,
+			stderr=subprocess.DEVNULL,
+			close_fds=True, 
+			creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+		)
+		print(f"Edge started successfully. Process ID (PID): {proc.pid}")
+		print(f"Debug Port: {port}, User Dir: {user_data_dir}")
+		return proc
 
-def __create_new_chrome_win11(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
-	if(rootdir is None):
-		rootdir = tempfile.TemporaryDirectory()
-	options = webdriver.ChromeOptions()
-	options.add_argument("--start-maximized")
-	# -- ---------------------------------------------------------------------
-	# !! try to avoid being detected as automated session
-	# -- ---------------------------------------------------------------------
-	# -- ---------------------------------------------------------------------
-	# !! based on idea from (doesn't work)
-	# !! https://stackoverflow.com/questions/33225947/can-a-website-detect-when-you-are-using-selenium-with-chromedriver
-	# !!
-	# options.add_argument("user-agent=Chrome")
-	# -- ---------------------------------------------------------------------
-	# -- ---------------------------------------------------------------------
-	# !! based on idea from (working)
-	# !! https://piprogramming.org/articles/How-to-make-Selenium-undetectable-and-stealth--7-Ways-to-hide-your-Bot-Automation-from-Detection-0000000017.html
-	# !! TDA: working as of 2022-03-17
-	# !! fidelity: working as of 2022-03-17
-	options.add_experimental_option("excludeSwitches", ["enable-automation"])
-	options.add_experimental_option('useAutomationExtension', False)
-	options.add_argument('--disable-blink-features=AutomationControlled')
-	pprint(options)
-	# -- ---------------------------------------------------------------------
-	# --
-	# --
-	# --
-	if(incognito):
-		options.add_argument("--incognito")
-	driver = webdriver.Chrome(options=options)
-	return driver
+	except FileNotFoundError:
+		print(f"ERROR: Edge executable not found: {edge_path}")
+		raise e
+	except Exception as e:
+		print(f"ERROR starting process: {e}")
+		raise e
 
-def __create_new_edge_win11(rootdir=None,persist_name=None,incognito=True,driver_bin_loc=CHROME_WEBDRIVER_BINARY_LOCATION,browser_bin_loc=CHROME_BINARY_LOCATION):
+def start_chrome_for_debug( port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, chrome_path=DEF_CHROME_BROWSER_PATH):
+	# --
+	# -- Ensure the user data directory exists for the isolated profile
+	# --
+	os.makedirs(user_data_dir, exist_ok=True)
+	# --
+	# -- Construct the full list of command arguments
+	# --
+	command = [
+		chrome_path,
+		f"--remote-debugging-port={port}",
+		f"--user-data-dir={user_data_dir}",
+		# Optional: Start with a clean slate for the UI 
+		# "--disable-extensions",
+		# "--disable-default-apps"
+	]
+	try:
+		display(f"Starting chrome browser ... ")
+		display(command)
+		# --
+		# -- Use subprocess.Popen to start the process
+		# -- The creationflags ensure the process is fully independent (detached)
+		# --
+		proc = subprocess.Popen(
+			command,
+			**detach_process_flags(),
+		)
+		print(f"Chrome started successfully. Process ID (PID): {proc.pid}")
+		print(f"Debug Port: {port}, User Dir: {user_data_dir}")
+		return proc
+	except FileNotFoundError:
+		print(f"ERROR: Chrome executable not found: {chrome_path}")
+		raise e
+	except Exception as e:
+		print(f"ERROR starting process: {e}")
+		raise e
+
+def start_browser_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, browser_type="chrome", browserPath=DEF_CHROME_BROWSER_PATH):
+	if(browser_type=="chrome"):
+		return start_chrome_for_debug(
+			port=port, 
+			user_data_dir=user_data_dir, 
+			chrome_path=browserPath
+		)
+	elif(browser_type=="edge"):
+		return start_edge_for_debug(
+			port=port, 
+			user_data_dir=user_data_dir, 
+			edge_path=browserPath
+		)
+	else:
+		raise ValueError(f"browser_type must be 'chrome' and 'edge'")
+
+# --
+# --
+# --
+def connect_to_edge_browser(port=DEF_DEBUG_PORT, driverPath=DEF_EDGE_WEBDRV_PATH):
 	from selenium.webdriver.edge.options import Options
 	from selenium.webdriver.edge.service import Service
 	# --
-	options = Options()
-	options.add_argument("--disable-blink-features=AutomationControlled")
-	driver = webdriver.Edge(service=Service(), options=options)
-	return driver
+	# --- Setup Options ---
+	# --
+	edge_options = Options()
+	# --
+	# -- THE CRITICAL STEP:
+	# -- This tells Selenium: "Don't open a new window. 
+	# -- Look for an existing browser listening on this address."
+	# --
+	edge_options.add_experimental_option("debuggerAddress", f"localhost:{port}")
+	try:
+		print(f"Connecting to Edge on port {port}...")
+		print(f"driver binary {driverPath}...")
+		# --
+		service = Service(executable_path=driverPath)
+		driver = webdriver.Edge(service=service, options=edge_options)
+		# --
+		# -- Prove the connection works by printing the current page title
+		# --
+		print("Successfully connected!")
+		print(f"Current Page Title: {driver.title}")
+		return driver
+	except Exception as e:
+		print(f"Connection failed: {e}")
+		raise e
 
-def persist_connection_info(*,driver=None,sessionURL=None,sessionID=None,persist_name):
-	if(driver is not None):
-		sessionURL = driver.command_executor._url
-		sessionID = driver.session_id
-	connection_info = {
-		'url' : sessionURL,
-		'session_id' : sessionID,
-		'persist_name' : persist_name,
-		'timestamp' : datetime.datetime.now()
-	}
-	fname = connection_info_name(persist_name)
-	pickle.dump(connection_info,open(fname,"wb"))
-	os.chmod(fname, 0o600) # only user can read/write
+def connect_to_chrome_browser(port=DEF_DEBUG_PORT, driverPath=DEF_CHROME_WEBDRV_PATH):
+	from selenium.webdriver.chrome.service import Service
+	from selenium.webdriver.chrome.options import Options
+	# --
+	# --- Setup Options ---
+	# --
+	chrome_options = Options()
+	# --
+	# -- THE CRITICAL STEP:
+	# -- This tells Selenium: "Don't open a new window.
+	# -- Look for an existing browser listening on this address."
+	# --
+	chrome_options.add_experimental_option("debuggerAddress", f"localhost:{port}")
+	# --- Connect ---
+	try:
+		print(f"Using ChromeDriver binary from: {driverPath}...")
+		print(f"Connecting to Chrome on port {port}...")
+		# --
+		# -- Initialize the Service object with the ChromeDriver path
+		# --
+		service = Service(executable_path=driverPath)
+		driver = webdriver.Chrome(service=service, options=chrome_options)
+		# --
+		# -- Prove the connection works by printing the current page title
+		# --
+		print("Successfully connected!")
+		print(f"Current Page Title: {driver.title}")
+		return driver
+	except Exception as e:
+		print(f"Connection failed: {e}")
+		raise e
 
-def temporary_dir_name(persist_name):
-	hasher = hashlib.sha256()
-	cinfo_name = "ci_{}".format(persist_name)
-	hasher.update(cinfo_name.encode("utf-8"))
-	return hasher.hexdigest()
+def connect_to_browser(port=DEF_DEBUG_PORT, browser_type=None, driverPath=DEF_EDGE_WEBDRV_PATH):
+	if(browser_type=="chrome"):
+		return connect_to_chrome_browser(
+			port=port, 
+			driverPath=driverPath
+		)
+	elif(browser_type=="edge"):
+		return connect_to_edge_browser(
+			port=port, 
+			driverPath=driverPath
+		)
+	else:
+		raise ValueError(f"browser_type must be 'chrome' and 'edge'")
 
-def connection_info_name(persist_name):
-	#hasher = hashlib.sha256()
-	#cinfo_name = "ci_{}".format(persist_name)
-	#hasher.update(cinfo_name.encode("utf-8"))
-	hash = temporary_dir_name(persist_name)
-	fname = f".{hash}.pk"
-	return fname
-
-def reconnect_browser(*,persist_name):
-	fname = connection_info_name(persist_name)
-	connection_info = pickle.load(open(fname,"rb"))
-	driver = webdriver.Remote(command_executor=connection_info['url'],desired_capabilities={})
-	driver.close() #// Remote will open a new browser
-	driver.session_id = connection_info['session_id']
-	return driver
+# --
+# --
+# --
+def is_driver_connected(driver):
+	try:
+		# Attempt to access a property that requires an active session
+		current_url = driver.current_url 
+		print(f"Driver is connected. Current URL: {current_url}")
+		return True
+	except WebDriverException as e:
+		print(f"Driver is DISCONNECTED or session is invalid.")
+		print(f"Error: {e.__class__.__name__}")
+		return False
+	except Exception as e:
+		# Catch unexpected errors (e.g., driver object is None)
+		print(f"An unexpected error occurred: {e}")
+		return False
 
