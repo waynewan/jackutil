@@ -247,3 +247,12 @@ def is_driver_connected(driver):
 		print(f"An unexpected error occurred: {e}")
 		return False
 
+# --
+# --
+# --
+def temporary_dir_name(persist_name):
+	hasher = hashlib.sha256()
+	cinfo_name = "ci_{}".format(persist_name)
+	hasher.update(cinfo_name.encode("utf-8"))
+	return hasher.hexdigest()
+
