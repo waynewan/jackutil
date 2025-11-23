@@ -54,7 +54,7 @@ def detach_process_flags():
 			"creationflags" : subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
 		}
 
-def start_edge_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_EDGE_USER_DATA_DIR, edge_path=DEF_EDGE_BROWSER_PATH):
+def start_edge_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_EDGE_USER_DATA_DIR, edge_path=DEF_EDGE_BROWSER_PATH, optional_flags=[]):
 	# --
 	# -- Ensure the user data directory exists
 	# --
@@ -67,8 +67,9 @@ def start_edge_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_EDGE_USER_DATA_D
 		f"--remote-debugging-port={port}",
 		f"--user-data-dir={user_data_dir}",
 		# Optional: Start with a clean slate for the UI 
-		# "--disable-extensions",
-		# "--disable-default-apps"
+		"--disable-extensions",
+		"--disable-default-apps",
+		*optional_flags,
 	]
 	try:
 		display(f"Starting chrome browser ... ")
@@ -98,7 +99,7 @@ def start_edge_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_EDGE_USER_DATA_D
 		print(f"ERROR starting process: {e}")
 		raise e
 
-def start_chrome_for_debug( port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, chrome_path=DEF_CHROME_BROWSER_PATH):
+def start_chrome_for_debug( port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, chrome_path=DEF_CHROME_BROWSER_PATH, optional_flags=[]):
 	# --
 	# -- Ensure the user data directory exists for the isolated profile
 	# --
@@ -111,8 +112,9 @@ def start_chrome_for_debug( port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_D
 		f"--remote-debugging-port={port}",
 		f"--user-data-dir={user_data_dir}",
 		# Optional: Start with a clean slate for the UI 
-		# "--disable-extensions",
-		# "--disable-default-apps"
+		"--disable-extensions",
+		"--disable-default-apps",
+		*optional_flags,
 	]
 	try:
 		display(f"Starting chrome browser ... ")
@@ -135,18 +137,25 @@ def start_chrome_for_debug( port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_D
 		print(f"ERROR starting process: {e}")
 		raise e
 
-def start_browser_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, browser_type="chrome", browserPath=DEF_CHROME_BROWSER_PATH):
+def start_browser_for_debug(port=DEF_DEBUG_PORT, user_data_dir=DEF_CHROME_USER_DATA_DIR, browser_type="chrome", browserPath=DEF_CHROME_BROWSER_PATH,incog=True):
+	optional_flags = []
 	if(browser_type=="chrome"):
+		if(incog):
+			optional_flags.append('--incognito')
 		return start_chrome_for_debug(
 			port=port, 
 			user_data_dir=user_data_dir, 
-			chrome_path=browserPath
+			chrome_path=browserPath,
+			optional_flags=optional_flags,
 		)
 	elif(browser_type=="edge"):
+		if(incog):
+			optional_flags.append('--inprivate')
 		return start_edge_for_debug(
 			port=port, 
 			user_data_dir=user_data_dir, 
-			edge_path=browserPath
+			edge_path=browserPath,
+			optional_flags=optional_flags,
 		)
 	else:
 		raise ValueError(f"browser_type must be 'chrome' and 'edge'")
