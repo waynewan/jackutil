@@ -89,6 +89,9 @@ def if_else(cond,true_val,false_val):
 def today():
 	return date.today()
 
+def current():
+	return datetime.now()
+
 def days_between(dt_s, dt_b):
 	difference = dt_b - dt_s
 	return difference.days
