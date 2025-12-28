@@ -248,30 +248,6 @@ def make_callable(f_name,m_name=None):
 def callable_fq_name(func):
 	return ".".join([ func.__module__,func.__name__ ])
 # --
-# --
-# --
-def shortname(fname):
-	keychain = fname.split('/')
-	if(keychain[-1].isdigit()):
-		return '/'.join(keychain[-2:])
-	else:
-		return keychain[-1]
-
-def shortnames(*fnames):
-	briefs = []
-	for fname in fnames:
-		briefs.append(shortname(fname))
-	return briefs
-
-# --
-# --
-# --
-def rename_columns(df,cols_name):
-	if(cols_name is not None):
-		df.rename( columns=lambda ii:cols_name[ii],inplace=True )
-	return df
-
-# --
 # -- add list2 to list1, keep order intact, eliminate dup
 # !! list1 is modified
 # --
@@ -318,43 +294,6 @@ def countdown(seconds,desc="Countdown"):
 	progress_bar.close()
 
 # --
-# -- Reads a file and returns its numeric content as an integer, 
-# -- or None if the file is empty or non-numeric.
-# --
-def read_numeric_from_file(fname):
-	try:
-		with open(fname, 'r') as file:
-			content = file.read().strip()
-			if content.isdigit():
-				print(f'The file {fname} found, Using value {content}.')
-				return int(content)
-			else:
-				print(f'The file {fname} found, but cannot interpret content. Using None.')
-				return None
-	except FileNotFoundError:
-		print(f"The file {fname} does not exist.")
-		return None
-
-# -- 
-# -- Creates an empty file with the given name 'fname', 
-# -- and if the file exists, empties its content.
-# -- 
-def create_or_empty_file(fname):
-	with open(fname, 'w') as file:
-		pass  # Opening the file in 'w' mode will create it if it doesn't exist, or empty it if it does.
-
-# --
-# -- Writes the current Unix timestamp to a file.
-# --
-def write_current_time_to_file(fname):
-	# Get the current Unix timestamp
-	current_time = int(time.time())
-	
-	# Write the timestamp to the file
-	with open(fname, 'w') as file:
-		file.write(str(current_time))
-
-# --
 # -- example: types_validate(base,msg="base",types=[ type([]) ],allow_none=False)
 # -- must be a list(), and cannot be None; otherwise throw ValueError
 # --
@@ -366,53 +305,4 @@ def types_validate(obj, types=[], msg="obj", raise_on_err=True, allow_none=True)
 	if(raise_on_err):
 		raise ValueError(f"ERR:{msg}:Only applicable to {types}, found {type(obj)}")
 	return False
-	
-def read_dirty_csv(filepath, footer_lines=5):
-	print(f"Reading data and skipping {footer_lines} footer lines...")
-	try:
-		df = pandas.read_csv(
-			filepath,
-			engine='python',
-			skip_blank_lines=True,
-			skipfooter=footer_lines
-		)
-		df.columns = df.columns.str.strip()
-		df['Run Date'] = pandas.to_datetime(df['Run Date'], errors='coerce')
-		df['Settlement Date'] = pandas.to_datetime(df['Settlement Date'], errors='coerce')
-		return df
-	except FileNotFoundError:
-		print(f"Error: File not found at {filepath}")
-		return pandas.DataFrame()
-	except Exception as e:
-		print(f"An error occurred during file reading: {e}")
-		return pandas.DataFrame()
-
-import pandas
-
-def read_dirty_csv(filepath, header_row=1, date_col=[], num_col=[], key_col=[]):
-	try:
-		df = pandas.read_csv(
-			filepath,
-			engine='python',
-			skip_blank_lines=True,
-			header=header_row,
-		)
-		df.columns = df.columns.str.strip()
-		for nnull in key_col:
-			df = df[ ~ df[nnull].isna() ]
-		for dcol in date_col:
-			df[dcol] = pandas.to_datetime(df[dcol], errors='coerce')
-		for ncol in num_col:
-			try:
-				df[ncol] = df[ncol].str.replace(r'[$%,]','',regex=True).astype(float)
-			except Exception as e:
-				print(ncol,e)
-		return df
-	except FileNotFoundError:
-		print(f"Error: File not found at {filepath}")
-		return pandas.DataFrame()
-	except Exception as e:
-		print(e)
-		print(f"An error occurred during file reading: {e}")
-		return pandas.DataFrame()
 
