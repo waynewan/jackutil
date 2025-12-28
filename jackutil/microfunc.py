@@ -22,6 +22,12 @@ def rounddown(nn,dp=2):
 	else:
 		return rounded-pow(10,-dp)
 	
+def safe(fn,onerr=None):
+	try:
+		return fn()
+	except:
+		return onerr
+
 def extractvalues(src_map, key_vec):
 	return { key:src_map[key] for key in key_vec if(key in src_map) }
 
