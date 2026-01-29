@@ -267,6 +267,7 @@ def retry(fn,retry=10,exceptTypes=(Exception),pause=1,rtnEx=False,silent=True,co
 		try:
 			outcome = fn()
 			if(rtnEx):
+				exceptions.append( None )
 				return ( outcome, exceptions )
 			else:
 				return outcome
